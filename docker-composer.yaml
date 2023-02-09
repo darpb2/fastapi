@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+  web:
+    build: pip install --no-cache-dir --upgrade -r /code/requirements.txt
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/code
+  redis:
+    image: redis
+  postgres:
+    image: postgres:13.1
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "root" ]
+      timeout: 45s
+      interval: 10s
+      retries: 10
+    restart: always
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=password
+      - APP_DB_USER=docker
+      - APP_DB_PASS=docker
+      - APP_DB_NAME=docker
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d/
+    ports:
+      - 5432:5432
